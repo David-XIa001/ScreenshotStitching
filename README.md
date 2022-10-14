@@ -11,3 +11,8 @@
 - 点击下载,即可获得你需要的拼接图片
 
 ### 业务场景
+
+![image](https://github.com/David-XIa001/ScreenshotStitching/blob/main/222.jpeg)
+
+如果你需要截取视频中的字幕,试试这个吧
+
