@@ -23,7 +23,13 @@
                 </el-form-item>
             </el-form>
         </div>
-        <el-dialog title="截取图片" :visible.sync="centerDialogVisible" :close-on-click-modal="false" :before-close="closeDialog" width="50%">
+        <el-dialog
+            title="截取图片"
+            :visible.sync="centerDialogVisible"
+            :close-on-click-modal="false"
+            :before-close="closeDialog"
+            width="50%"
+        >
             <div class="box">
                 <video ref="currentVideo" muted="true" autoplay controls :src="currentVideoUrl" width="100%" />
                 <div class="line" :style="'bottom:' + lineHeight + 'px'"></div>
@@ -52,6 +58,9 @@
                 <span class="demonstration">截图高度</span>
                 <el-slider v-model="heigth" :step="1" :min="1" :max="videoHeight"></el-slider>
             </div>
+            <div class="block">
+                <el-switch v-model="special" active-text="首图剪裁" inactive-text="首图不剪裁"> </el-switch>
+            </div>
             <el-button type="primary" :disabled="imageList.length == 0" @click="onStitch">拼接图片</el-button>
             <span slot="footer" class="dialog-footer">
                 <el-button type="primary" @click="downImg" :disabled="!stitchImg">下载拼接图片</el-button>
@@ -76,7 +85,8 @@ export default {
             heigth: 0,
             videoReallHeight: 0,
             lineHeight: 0,
-            stitchImg: ''
+            stitchImg: '',
+            special: false
         };
     },
     watch: {
@@ -139,7 +149,7 @@ export default {
                 // 创建 canvas 节点并初始化
                 const canvas = document.createElement('canvas');
                 canvas.width = cwith;
-                canvas.height = cheight * list.length;
+                canvas.height = !this.special ? this.videoHeight + cheight * (list.length - 1) : cheight * list.length;
                 const context = canvas.getContext('2d');
                 list.map((item, index) => {
                     const img = new Image();
@@ -147,17 +157,21 @@ export default {
                     // 跨域
                     img.crossOrigin = 'Anonymous';
                     img.onload = () => {
-                        context.drawImage(
-                            img,
-                            0,
-                            this.videoHeight - this.heigth,
-                            this.videoWidth,
-                            this.heigth,
-                            0,
-                            this.heigth * index,
-                            this.videoWidth,
-                            this.heigth
-                        );
+                        if (!this.special && index == 0) {
+                            context.drawImage(img, 0, 0, this.videoWidth, this.videoHeight);
+                        } else {
+                            context.drawImage(
+                                img,
+                                0,
+                                this.videoHeight - this.heigth,
+                                this.videoWidth,
+                                this.heigth,
+                                0,
+                                !this.special ? this.videoHeight + this.heigth * (index - 1) : this.heigth * index,
+                                this.videoWidth,
+                                this.heigth
+                            );
+                        }
                         if (index === list.length - 1) {
                             resolve(canvas.toDataURL('image/png'));
                         }
@@ -192,15 +206,16 @@ export default {
                 this.videoReallHeight = video.clientHeight;
             }, 500);
         },
-        closeDialog(){
+        closeDialog() {
             this.centerDialogVisible = false;
             this.imageList = [];
-            this.videoWidth = ''
+            this.videoWidth = '';
             this.videoHeight = 0;
             this.heigth = 0;
             this.videoReallHeight = 0;
             this.lineHeight = 0;
-            this.stitchImg = ''
+            this.stitchImg = '';
+            this.special = false;
         },
         onUploadChange(file, fileList) {
             const flieArr = file.name.split('.');
