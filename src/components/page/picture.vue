@@ -41,22 +41,31 @@
                 <el-button type="primary" :disabled="imgListCopy.length == 0" @click="onStitch">拼接图片</el-button>
                 <el-button type="primary" @click="downImg" :disabled="!stitchImg">下载拼接图片</el-button>
                 <template v-for="(img, index) in imgListCopy">
-                    <div class="img-box1" v-if="!special && index == 0">
-                        <el-image ref="img" v-if="!special && index == 0" class="img" :src="imgListCopy[index]"></el-image>
+                    <div class="img-box" :style="!special && index == 0 ? '' : `height: ${heigth}px`">
+                        <el-image
+                            ref="img"
+                            :class="!special && index == 0 ? 'img1' : 'img'"
+                            :style="!special && index == 0 ? '' : `top: -${reallHeight - heigth}px`"
+                            :src="imgListCopy[index]"
+                        ></el-image>
                         <div class="operation">
-                            <i @click="onMove(index)" title="下移" class="el-icon-bottom"></i>
-                            <i @click="onDelete(index)" title="删除" class="el-icon-delete" />
-                        </div>
-                    </div>
-                    <div class="img-box" v-else :style="`height: ${heigth}px`">
-                        <el-image ref="img" class="img" :style="`top: -${reallHeight - heigth}px`" :src="imgListCopy[index]"></el-image>
-                        <div class="operation">
-                            <i
-                                @click="onMove(index)"
-                                :title="index == 0 ? '下移' : '上移'"
-                                :class="index == 0 ? 'el-icon-bottom' : 'el-icon-top'"
-                            ></i>
-                            <i @click="onDelete(index)" title="删除" class="el-icon-delete" />
+                            <el-button type="danger" title="删除" @click="onDelete(index)" icon="el-icon-delete" circle></el-button>
+                            <el-button
+                                type="primary"
+                                title="上移"
+                                v-if="index !== 0"
+                                @click="onMove(index, 'top')"
+                                icon="el-icon-top"
+                                circle
+                            ></el-button>
+                            <el-button
+                                type="primary"
+                                title="下移"
+                                v-if="index !== imgListCopy.length - 1"
+                                @click="onMove(index, 'bottom')"
+                                icon="el-icon-bottom"
+                                circle
+                            ></el-button>
                         </div>
                     </div>
                 </template>
@@ -84,18 +93,18 @@ export default {
         heigth: function (newVal, oldVal) {}
     },
     methods: {
-        onDelete(index){
+        onDelete(index) {
             this.imgListCopy.splice(index, 1);
         },
-        onMove(index) {
-            if (index == 0) {
-                let item = this.imgListCopy[index + 1];
-                this.$set(this.imgListCopy, index + 1, this.imgListCopy[index]);
-                this.$set(this.imgListCopy, index, item);
+        onMove(index, type) {
+            if (type === 'bottom') {
+                let item = this.imageList[index];
+                this.$set(this.imageList, index, this.imageList[index + 1]);
+                this.$set(this.imageList, index + 1, item);
             } else {
-                let item = this.imgListCopy[index - 1];
-                this.$set(this.imgListCopy, index - 1, this.imgListCopy[index]);
-                this.$set(this.imgListCopy, index, item);
+                let item = this.imageList[index];
+                this.$set(this.imageList, index, this.imageList[index - 1]);
+                this.$set(this.imageList, index - 1, item);
             }
         },
         downImg() {
@@ -189,29 +198,7 @@ export default {
                 width: 100%;
                 position: absolute;
             }
-            .operation {
-                position: absolute;
-                top: 10px;
-                right: 10px;
-                display: flex;
-                width: 60px;
-                justify-content: space-between;
-                .el-icon-bottom,
-                .el-icon-top,
-                .el-icon-delete {
-                    font-size: 24px;
-                    cursor: pointer;
-                    color: #324157;
-                    &:hover {
-                        color: #ffffff;
-                    }
-                }
-            }
-        }
-        .img-box1 {
-            overflow: hidden;
-            position: relative;
-            .img {
+            .img1 {
                 vertical-align: bottom;
                 width: 100%;
                 overflow: hidden;
@@ -221,17 +208,13 @@ export default {
                 top: 10px;
                 right: 10px;
                 display: flex;
-                width: 60px;
-                justify-content: space-between;
+                width: 120px;
                 .el-icon-bottom,
                 .el-icon-top,
                 .el-icon-delete {
-                    font-size: 24px;
+                    font-size: 12px;
                     cursor: pointer;
-                    color: #324157;
-                    &:hover {
-                        color: #ffffff;
-                    }
+  
                 }
             }
         }

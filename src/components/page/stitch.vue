@@ -50,7 +50,29 @@
                                 <el-popover :key="index" placement="top-start" width="300" trigger="hover">
                                     <div>
                                         <el-image style="width: 300px" :src="imageList[index]" :fit="'cover'"></el-image>
-                                        <el-button type="danger" @click="onDelete(index)" icon="el-icon-delete" circle></el-button>
+                                        <el-button
+                                            type="danger"
+                                            title="删除"
+                                            @click="onDelete(index)"
+                                            icon="el-icon-delete"
+                                            circle
+                                        ></el-button>
+                                        <el-button
+                                            type="primary"
+                                            title="左移"
+                                            v-if="index !== 0"
+                                            @click="onMove(index, 'left')"
+                                            icon="el-icon-back"
+                                            circle
+                                        ></el-button>
+                                        <el-button
+                                            type="primary"
+                                            title="右移"
+                                            v-if="index !== imageList.length - 1"
+                                            @click="onMove(index, 'right')"
+                                            icon="el-icon-right"
+                                            circle
+                                        ></el-button>
                                     </div>
                                     <el-image slot="reference" style="width: 100px" :src="imageList[index]" :fit="'cover'"></el-image>
                                 </el-popover>
@@ -116,6 +138,17 @@ export default {
         },
         onDelete(index) {
             this.imageList.splice(index, 1);
+        },
+        onMove(index, type) {
+            if (type === 'right') {
+                let item = this.imageList[index];
+                this.$set(this.imageList, index, this.imageList[index + 1]);
+                this.$set(this.imageList, index + 1, item);
+            } else {
+                let item = this.imageList[index];
+                this.$set(this.imageList, index, this.imageList[index - 1]);
+                this.$set(this.imageList, index - 1, item);
+            }
         },
         onStitch() {
             this.mergeImgs(this.imageList).then((res) => {
