@@ -38,15 +38,26 @@
                         <el-slider v-model="heigth" :step="1" :min="1" :max="reallHeight"></el-slider>
                     </el-form-item>
                 </el-form>
-                <el-button type="primary" :disabled="imgList.length == 0" @click="onStitch">拼接图片</el-button>
+                <el-button type="primary" :disabled="imgListCopy.length == 0" @click="onStitch">拼接图片</el-button>
                 <el-button type="primary" @click="downImg" :disabled="!stitchImg">下载拼接图片</el-button>
-                <template v-for="(img, index) in imgList">
+                <template v-for="(img, index) in imgListCopy">
                     <div class="img-box1" v-if="!special && index == 0">
-                        <el-image ref="img" v-if="!special && index == 0" class="img" :src="imgList[index]"></el-image>
+                        <el-image ref="img" v-if="!special && index == 0" class="img" :src="imgListCopy[index]"></el-image>
+                        <div class="operation">
+                            <i @click="onMove(index)" title="下移" class="el-icon-bottom"></i>
+                            <i @click="onDelete(index)" title="删除" class="el-icon-delete" />
+                        </div>
                     </div>
                     <div class="img-box" v-else :style="`height: ${heigth}px`">
-                        <el-image ref="img" class="img" :style="`top: -${reallHeight - heigth}px`" :src="imgList[index]"></el-image>
-                        <div></div>
+                        <el-image ref="img" class="img" :style="`top: -${reallHeight - heigth}px`" :src="imgListCopy[index]"></el-image>
+                        <div class="operation">
+                            <i
+                                @click="onMove(index)"
+                                :title="index == 0 ? '下移' : '上移'"
+                                :class="index == 0 ? 'el-icon-bottom' : 'el-icon-top'"
+                            ></i>
+                            <i @click="onDelete(index)" title="删除" class="el-icon-delete" />
+                        </div>
                     </div>
                 </template>
             </div>
@@ -58,6 +69,7 @@ export default {
     data() {
         return {
             imgList: [],
+            imgListCopy: [],
             uidList: [],
             centerDialogVisible: false,
             heigth: 0,
@@ -72,6 +84,20 @@ export default {
         heigth: function (newVal, oldVal) {}
     },
     methods: {
+        onDelete(index){
+            this.imgListCopy.splice(index, 1);
+        },
+        onMove(index) {
+            if (index == 0) {
+                let item = this.imgListCopy[index + 1];
+                this.$set(this.imgListCopy, index + 1, this.imgListCopy[index]);
+                this.$set(this.imgListCopy, index, item);
+            } else {
+                let item = this.imgListCopy[index - 1];
+                this.$set(this.imgListCopy, index - 1, this.imgListCopy[index]);
+                this.$set(this.imgListCopy, index, item);
+            }
+        },
         downImg() {
             let a = document.createElement('a');
             a.download = 'stitch';
@@ -83,7 +109,7 @@ export default {
             document.body.removeChild(a);
         },
         onStitch() {
-            this.mergeImgs(this.imgList).then((res) => {
+            this.mergeImgs(this.imgListCopy).then((res) => {
                 this.stitchImg = res;
             });
         },
@@ -129,6 +155,7 @@ export default {
             this.centerDialogVisible = false;
         },
         onPreview() {
+            this.imgListCopy = JSON.parse(JSON.stringify(this.imgList));
             this.centerDialogVisible = true;
             setTimeout(() => {
                 const img = this.$refs.img;
@@ -162,13 +189,50 @@ export default {
                 width: 100%;
                 position: absolute;
             }
+            .operation {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                display: flex;
+                width: 60px;
+                justify-content: space-between;
+                .el-icon-bottom,
+                .el-icon-top,
+                .el-icon-delete {
+                    font-size: 24px;
+                    cursor: pointer;
+                    color: #324157;
+                    &:hover {
+                        color: #ffffff;
+                    }
+                }
+            }
         }
         .img-box1 {
             overflow: hidden;
+            position: relative;
             .img {
                 vertical-align: bottom;
                 width: 100%;
                 overflow: hidden;
+            }
+            .operation {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                display: flex;
+                width: 60px;
+                justify-content: space-between;
+                .el-icon-bottom,
+                .el-icon-top,
+                .el-icon-delete {
+                    font-size: 24px;
+                    cursor: pointer;
+                    color: #324157;
+                    &:hover {
+                        color: #ffffff;
+                    }
+                }
             }
         }
     }
