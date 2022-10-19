@@ -34,7 +34,8 @@
                     >
                         <div class="box">
                             <video ref="currentVideo" muted="true" autoplay controls :src="currentVideoUrl" width="100%" />
-                            <div class="line" :style="'bottom:' + lineHeight + 'px'"></div>
+                            <div class="line" :style="'bottom:' + lineHeight1 + 'px'"></div>
+                            <div class="line" :style="'bottom:' + lineHeight0 + 'px'"></div>
                         </div>
                         <!-- <el-form ref="form" label-width="80px">
                 <el-form-item label="开始时间">
@@ -80,7 +81,7 @@
                         </div>
                         <div class="block">
                             <span class="demonstration">截图高度</span>
-                            <el-slider v-model="heigth" :step="1" :min="1" :max="videoHeight"></el-slider>
+                            <el-slider v-model="heigth" :step="1" range :min="0" :max="videoHeight"></el-slider>
                         </div>
                         <div class="block">
                             <el-switch v-model="special" active-text="首图剪裁" inactive-text="首图不剪裁"> </el-switch>
@@ -112,9 +113,8 @@ export default {
             imageList1: [],
             videoWidth: '',
             videoHeight: 0,
-            heigth: 0,
+            heigth: [0, 0],
             videoReallHeight: 0,
-            lineHeight: 0,
             stitchImg: '',
             special: false,
             activeName: 'picture'
@@ -122,7 +122,16 @@ export default {
     },
     watch: {
         heigth: function (newVal, oldVal) {
-            this.lineHeight = (newVal / this.videoHeight) * this.videoReallHeight;
+            this.lineHeight0 = (newVal[0] / this.videoHeight) * this.videoReallHeight;
+            this.lineHeight1 = (newVal[1] / this.videoHeight) * this.videoReallHeight;
+        }
+    },
+    computed: {
+        lineHeight0() {
+            return (this.heigth[0] / this.videoHeight) * this.videoReallHeight;
+        },
+        lineHeight1() {
+            return (this.heigth[1] / this.videoHeight) * this.videoReallHeight;
         }
     },
     methods: {
@@ -186,7 +195,7 @@ export default {
         //         });
         //     });
         // },
-        mergeImgs(list, cwith = this.videoWidth, cheight = this.heigth) {
+        mergeImgs(list, cwith = this.videoWidth, cheight = this.heigth[1] - this.heigth[0]) {
             return new Promise((resolve, reject) => {
                 // 创建 canvas 节点并初始化
                 const canvas = document.createElement('canvas');
@@ -208,7 +217,7 @@ export default {
                             context.drawImage(
                                 img,
                                 0, // 开始剪切图片的 x 坐标位置
-                                this.videoHeight - cheight, // 开始剪切图片的 y 坐标位置
+                                this.videoHeight - this.heigth[1], // 开始剪切图片的 y 坐标位置
                                 cwith, // 被剪切图像的宽度
                                 cheight, // 被剪切图像的高度
                                 0, // 在画布上放置图像的 x 坐标位置
@@ -247,7 +256,7 @@ export default {
                 const video = this.$refs.currentVideo;
                 this.videoWidth = video.videoWidth;
                 this.videoHeight = video.videoHeight;
-                this.heigth = 200;
+                this.heigth = [0, 200];
                 this.videoReallHeight = video.clientHeight;
             }, 500);
         },
@@ -256,9 +265,10 @@ export default {
             this.imageList = [];
             this.videoWidth = '';
             this.videoHeight = 0;
-            this.heigth = 0;
+            this.heigth = [0, 0];
             this.videoReallHeight = 0;
-            this.lineHeight = 0;
+            this.lineHeight0 = 0;
+            this.lineHeight1 = 0;
             this.stitchImg = '';
             this.special = false;
         },

@@ -35,17 +35,17 @@
                 </div>
                 <el-form label-width="80px">
                     <el-form-item label="截图高度">
-                        <el-slider v-model="heigth" :step="1" :min="1" :max="reallHeight"></el-slider>
+                        <el-slider v-model="height" range :step="1" :min="0" :max="reallHeight"></el-slider>
                     </el-form-item>
                 </el-form>
                 <el-button type="primary" :disabled="imgListCopy.length == 0" @click="onStitch">拼接图片</el-button>
                 <el-button type="primary" @click="downImg" :disabled="!stitchImg">下载拼接图片</el-button>
                 <template v-for="(img, index) in imgListCopy">
-                    <div class="img-box" :style="!special && index == 0 ? '' : `height: ${heigth}px`">
+                    <div class="img-box" :style="!special && index == 0 ? '' : `height: ${height[1] - height[0]}px`">
                         <el-image
                             ref="img"
                             :class="!special && index == 0 ? 'img1' : 'img'"
-                            :style="!special && index == 0 ? '' : `top: -${reallHeight - heigth}px`"
+                            :style="!special && index == 0 ? '' : `top: ${height[1] - reallHeight}px`"
                             :src="imgListCopy[index]"
                         ></el-image>
                         <div class="operation">
@@ -81,16 +81,13 @@ export default {
             imgListCopy: [],
             uidList: [],
             centerDialogVisible: false,
-            heigth: 0,
+            height: [0, 0],
             special: false,
             reallHeight: 0,
             imageHeight: 0,
             imageWidth: 0,
             stitchImg: ''
         };
-    },
-    watch: {
-        heigth: function (newVal, oldVal) {}
     },
     methods: {
         onDelete(index) {
@@ -122,7 +119,7 @@ export default {
                 this.stitchImg = res;
             });
         },
-        mergeImgs(list, cwith = this.imageWidth, cheight = parseInt((this.heigth * this.imageWidth) / 760)) {
+        mergeImgs(list, cwith = this.imageWidth, cheight = parseInt(((this.height[1] - this.height[0]) * this.imageWidth) / 760)) {
             return new Promise((resolve, reject) => {
                 // 创建 canvas 节点并初始化
                 const canvas = document.createElement('canvas');
@@ -144,7 +141,7 @@ export default {
                             context.drawImage(
                                 img,
                                 0, // 开始剪切图片的 x 坐标位置
-                                this.imageHeight - cheight, // 开始剪切图片的 y 坐标位置
+                                this.imageHeight - (this.height[1] * this.imageWidth) / 760, // 开始剪切图片的 y 坐标位置
                                 cwith, // 被剪切图像的宽度
                                 cheight, // 被剪切图像的高度
                                 0, // 在画布上放置图像的 x 坐标位置
@@ -171,7 +168,7 @@ export default {
                 this.imageHeight = img[0].imageHeight;
                 this.imageWidth = img[0].imageWidth;
                 this.reallHeight = parseInt((760 / this.imageWidth) * this.imageHeight);
-                this.heigth = 100;
+                this.height = [0, 100];
             }, 300);
         },
         onUploadChange(file, fileList) {
@@ -188,8 +185,6 @@ export default {
 </script>
 <style lang="less">
 .picture {
-    .block {
-    }
     .box {
         .img-box {
             position: relative;
@@ -214,7 +209,6 @@ export default {
                 .el-icon-delete {
                     font-size: 12px;
                     cursor: pointer;
-  
                 }
             }
         }
