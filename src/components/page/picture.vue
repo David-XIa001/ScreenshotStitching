@@ -95,13 +95,13 @@ export default {
         },
         onMove(index, type) {
             if (type === 'bottom') {
-                let item = this.imageList[index];
-                this.$set(this.imageList, index, this.imageList[index + 1]);
-                this.$set(this.imageList, index + 1, item);
+                let item = this.imgListCopy[index];
+                this.$set(this.imgListCopy, index, this.imgListCopy[index + 1]);
+                this.$set(this.imgListCopy, index + 1, item);
             } else {
-                let item = this.imageList[index];
-                this.$set(this.imageList, index, this.imageList[index - 1]);
-                this.$set(this.imageList, index - 1, item);
+                let item = this.imgListCopy[index];
+                this.$set(this.imgListCopy, index, this.imgListCopy[index - 1]);
+                this.$set(this.imgListCopy, index - 1, item);
             }
         },
         downImg() {
