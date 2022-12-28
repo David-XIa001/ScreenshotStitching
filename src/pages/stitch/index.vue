@@ -98,7 +98,7 @@
 </template>
 
 <script>
-import Picture from './picture.vue';
+import Picture from './components/picture.vue';
 
 export default {
     components: { Picture },

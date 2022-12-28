@@ -11,7 +11,7 @@ export default new Router({
         },
         {
             path: '/stitch',
-            component: () => import('../components/page/stitch.vue'),
+            component: () => import('../pages/stitch'),
             meta: { title: '截图拼接' }
         },
         {
